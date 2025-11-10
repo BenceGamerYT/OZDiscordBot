@@ -13,11 +13,6 @@ intents.members = True
 # Bot prefix (pl. !kick, !ban stb.)
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Esemény: Bot készen áll
-@bot.event
-async def on_ready():
-    print(f"✅ Bejelentkezve: {bot.user}")
-
 # --- MODERÁCIÓS PARANCSOK (csak Rendszergazda jogosultsággal) ---
 
 def admin_or_role(ctx):
@@ -578,7 +573,79 @@ async def emlekezteto(ctx, ido: str, kanal: discord.TextChannel, *, uzenet: str)
         await ctx.send(f"⚠️ Hiba történt: `{e}`")
 
 
+# --- SOCIAL LINK PARANCS ---
+@bot.command(name="social")
+async def social(ctx, platform: str = None, channel: discord.TextChannel = None):
+    """
+    Különböző közösségi média linkeket küld be Embed formában.
+    Használat:
+    !social <platform> [#csatorna]
+    Példák:
+    !social tiktok
+    !social facebook #általános
+    """
 
+    # --- Linkek meghatározása ---
+    links = {
+        "tiktok": {
+            "name": "TikTok",
+            "url": "https://www.tiktok.com/@oz_magyarkanizsa",
+            "color": discord.Color.dark_gray(),
+            "emoji": "🎵"
+        },
+        "instagram": {
+            "name": "Instagram",
+            "url": "https://www.instagram.com/oz_magyarkanizsa/",
+            "color": discord.Color.purple(),
+            "emoji": "📸"
+        },
+        "facebook": {
+            "name": "Facebook",
+            "url": "https://www.facebook.com/OZ.kanjiza/",
+            "color": discord.Color.blue(),
+            "emoji": "📘"
+        },
+        "smartoffice": {
+            "name": "Smartoffice",
+            "url": "https://oz-smartoffice.rs/hu",
+            "color": discord.Color.dark_blue(),
+            "emoji": "🟦"
+        },
+    }
+
+    # --- Ha nincs megadva platform ---
+    if platform is None:
+        available = ", ".join(links.keys())
+        await ctx.send(f"⚠️ Használat: `!social <platform> [#csatorna]`\nElérhető opciók: `{available}`")
+        return
+
+    platform = platform.lower()
+
+    # --- Ha létezik a megadott platform ---
+    if platform in links:
+        info = links[platform]
+        embed = discord.Embed(
+            title=f"{info['emoji']} {info['name']}",
+            description=f"Kattints ide a hivatalos oldalunk megtekintéséhez 👇\n[**{info['name']} oldal megnyitása**]({info['url']})",
+            color=info['color']
+        )
+        embed.set_footer(
+            text=f"Kérte: {ctx.author.display_name}",
+            icon_url=ctx.author.avatar.url if ctx.author.avatar else None
+        )
+
+        # --- Ha nincs megadva csatorna, az aktuálisba küldi ---
+        target_channel = channel or ctx.channel
+        await target_channel.send(embed=embed)
+
+        # --- Visszajelzés, ha másik csatornába küldött ---
+        if channel and channel.id != ctx.channel.id:
+            await ctx.send(f"✅ Az üzenet sikeresen elküldve ide: {channel.mention}")
+
+    # --- Ha nincs ilyen platform ---
+    else:
+        available = ", ".join(links.keys())
+        await ctx.send(f"❌ Nincs ilyen platform: `{platform}`.\nElérhető opciók: `{available}`")
 
 # ---HELP PARANCS---
 @bot.command(name="helper")
@@ -650,6 +717,21 @@ async def help_command(ctx):
             "**Leírás:** Tömegesen töröl üzeneteket a csatornából.\n"
             "**Használat:** `!clear [mennyiség]`\n"
             "**Példa:** `!clear 10`\n"
+            "**Jogosultság:** Rendszergazda jogosultág"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="🧹 !social",
+        value=(
+            "**Leírás:** Beküldi az adott platformunk megnyitható hivatkozását.\n"
+            "**Használati variációk 1:** `!social [instagram] [#csatorna] (opcionális)`\n"
+            "**Használati variációk 2:** `!social [facebook] [#csatorna] (opcionális)`\n"
+            "**Használati variációk 3:** `!social [tiktok] [#csatorna] (opcionális)`\n"
+            "**Használati variációk 4:** `!social [smartoffice] [#csatorna] (opcionális)`\n"
+            "**Példa 1:** `!social facebook <---- Abba a csatornába küldi be, melyben meg lett irva a parancs!`\n"
+            "**Példa 2:** `!social facebook #csatorna <---- Abba a csatornába küldi be, amelyiket mi megadjunk neki!`\n"
             "**Jogosultság:** Rendszergazda jogosultág"
         ),
         inline=False
@@ -759,8 +841,3 @@ async def help_command(ctx):
     )
 
     await ctx.send(embed=embed)
-
-
-
-# --- Bot indítása ---
-bot.run("MTQzNTY2MTI0MzM1MTMwMjIzNQ.GV5E0M.UBnrYdx3jGDpKxkJrn1b2NzZN2urwg0PXh4pbg")
