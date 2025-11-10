@@ -18,9 +18,6 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 async def on_ready():
     print(f"✅ Bejelentkezve: {bot.user}")
 
-
-bot.run("MTQzNTY2MTI0MzM1MTMwMjIzNQ.GtqXh2.pt5AUuz7uBh_rpOGxthH0qztry5a3VyR__gahE")
-
 # --- MODERÁCIÓS PARANCSOK (csak Rendszergazda jogosultsággal) ---
 
 def admin_or_role(ctx):
@@ -849,3 +846,5 @@ async def help_command(ctx):
     )
 
     await ctx.send(embed=embed)
+
+    bot.run("MTQzNTY2MTI0MzM1MTMwMjIzNQ.GtqXh2.pt5AUuz7uBh_rpOGxthH0qztry5a3VyR__gahE")
